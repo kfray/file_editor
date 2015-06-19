@@ -1,11 +1,11 @@
 import os
 
 
-def edit_file(file_name, to_file_name, delimiter="\t", replacement_value="", exact_values=[], near_values=[]):
+def edit_file(file_name, to_file_name, delimiter, replacement_value, exact_values=[], near_values=[]):
 	"""takes a file with delimiter (default ",") and replaces values specified and writes a new file"""
 
 	def replace_empty(in_question):
-		if in_question.lower().strip() in exact_values or 	any(in_question.lower().strip() in near for near in near_values):
+		if in_question.lower().strip().strip("\"") in exact_values or any(in_question.lower().strip() in near for near in near_values):
 			return replacement_value
 		else:
 			return in_question
@@ -24,7 +24,20 @@ def edit_file(file_name, to_file_name, delimiter="\t", replacement_value="", exa
 			for line in f:
 				to_line=make_csv_line(line)
 				t.write(to_line + '\n')
-	return "Done"
+	return "Done."
 
-exact_values=["none","nan", "na",".","null", "n/a"]
+
+def edit_all_files(direc, to_direc,file_type, delimiter, replacement_value, exact_values=[], near_values=[]):
+    """moves recursively through a directory and returns the list of files within it all subdirectories"""
+    file_list=[]
+    for element in os.listdir(direc):
+    	if os.path.isdir(element):
+    		edit_all_files(os.path.join(direc, element), os.path.join(to_direc, element),delimiter, replacement_value, exact_values, near_values)
+    	elif os.path.splitext(element)[1]==file_type:
+    		edit_file(os.path.join(direc,element),os.path.join(to_direc,element),delimiter, replacement_value, exact_values, near_values)
+    return "All done."
+
+
+
+exact_values=["none","nan", "na",".","\"n/a\"", "\"\"", "null", "n/a"]
 
